@@ -11,6 +11,7 @@ export const GithubProvider = ({ children }) => {
 
   const initialState = {
     users: [],
+    user: {},
     loading: false,
   }
 
@@ -25,13 +26,29 @@ export const GithubProvider = ({ children }) => {
     const response = await fetch(`${Github_URL}/search/users?${params}`)
 
     const { items } = await response.json()
-    // setUsers(data)
-    // setLoading(false)
 
     dispatch({
       type: 'GET_USERS',
       payload: items,
     })
+  }
+
+  // get Single User
+  const getUser = async (login) => {
+    setLoading()
+
+    const response = await fetch(`${Github_URL}/users/${login}`)
+
+    if (response.status === 404) {
+      window.location = '/notfound'
+    } else {
+      const data = await response.json()
+
+      dispatch({
+        type: 'GET_USER',
+        payload: data,
+      })
+    }
   }
 
   //Clear Users from state
@@ -49,6 +66,8 @@ export const GithubProvider = ({ children }) => {
         loading: state.loading,
         searchUsers,
         clearUsers,
+        user: state.user,
+        getUser,
       }}
     >
       {children}
